@@ -1,17 +1,9 @@
 module OptRNN
 
-# Include submodules and core functionality
-# include("types/RNN.jl")
-# include("types/LSTM.jl")
-# include("types/GRU.jl")
-
-include("utils.jl")
-
 using JuMP
 
 # Export main types and functions
-
-export register_RNN!, register_LSTM!, register_GRU!, PytorchModel, ONNXModel
+export register_RNN!, register_LSTM!, register_GRU!, PyTorchModel, ONNXModel
 
 # Package version
 const VERSION = v"0.1.0"
@@ -23,6 +15,16 @@ A Julia package for embedding trained Recurrent Neural Networks (RNNs).
 
 """
 
+abstract type NNModel end
+abstract type ActFunc end
+
+
+include("types/models/pytorch.jl")
+include("types/models/onnx.jl")
+include("types/RNN.jl")
+include("types/LSTM.jl")
+include("types/GRU.jl")
+include("utils.jl")
 
 # Public API with keyword arguments
 """
@@ -39,17 +41,16 @@ Register an RNN to a JuMP model using the specified formulation method.
 
 # Examples
 ```julia
-register_RNN!(model; model_type=:onnx, full_space=true)
-register_RNN!(model; model_type=:pytorch, reduced_space=true)
-register_RNN!(model; model_type=:onnx, hybrid=true)
+register_RNN!(model; full_space=true)
+register_RNN!(model; reduced_space=true)
+register_RNN!(model; hybrid=true)
+```
 ```
 """
-function register_RNN!(model::JuMP.AbstractModel; model_type::Symbol=:onnx, full_space::Bool=false, reduced_space::Bool=false, hybrid::Bool=false)
-    # Validate model_type
-    if model_type !== :onnx && model_type !== :pytorch
-        error("model_type must be either :onnx or :pytorch. Got: $model_type")
-    end
+function register_RNN!(model::JuMP.AbstractModel, rnn_model::PyTorchModel; full_space::Bool=false, reduced_space::Bool=false, hybrid::Bool=false)
     
+    println("Registering given PyTorch RNN model...")
+
     # Validate that exactly one method is specified
     count_true = sum([full_space, reduced_space, hybrid])
     if count_true != 1
@@ -58,36 +59,32 @@ function register_RNN!(model::JuMP.AbstractModel; model_type::Symbol=:onnx, full
     
     # Dispatch to appropriate method based on keyword
     if full_space
-        return _register_RNN!(model, model_type, Val(:full_space))
+        return _register_RNN!(model, rnn_model, Val(:full_space))
     elseif reduced_space
-        return _register_RNN!(model, model_type, Val(:reduced_space))
+        return _register_RNN!(model, rnn_model, Val(:reduced_space))
     elseif hybrid
-        return _register_RNN!(model, model_type, Val(:hybrid))
+        return _register_RNN!(model, rnn_model, Val(:hybrid))
     end
 end
 
-# Multiple dispatch methods for different formulations
-function _register_RNN!(model::JuMP.AbstractModel, model_type::Symbol, ::Val{:full_space})
-    # Full space formulation implementation
-    # TODO: Implement full space formulation
-    @info "Registering RNN with full_space formulation using $model_type model type"
-    error("Full space formulation not implemented yet!")
+function register_RNN!(model::JuMP.AbstractModel, rnn_model::ONNXModel; full_space::Bool=false, reduced_space::Bool=false, hybrid::Bool=false)
+    
+    println("Registering given ONNX RNN model...")
+    # Validate that exactly one method is specified
+    count_true = sum([full_space, reduced_space, hybrid])
+    if count_true != 1
+        error("Exactly one of full_space, reduced_space, or hybrid must be set to true. Got: full_space=$full_space, reduced_space=$reduced_space, hybrid=$hybrid")
+    end
+    
+    # Dispatch to appropriate method based on keyword
+    if full_space
+        return _register_RNN!(model, rnn_model, Val(:full_space))
+    elseif reduced_space
+        return _register_RNN!(model, rnn_model, Val(:reduced_space))
+    elseif hybrid
+        return _register_RNN!(model, rnn_model, Val(:hybrid))
+    end
 end
-
-function _register_RNN!(model::JuMP.AbstractModel, model_type::Symbol, ::Val{:reduced_space})
-    # Reduced space formulation implementation
-    # TODO: Implement reduced space formulation
-    @info "Registering RNN with reduced_space formulation using $model_type model type"
-    error("Reduced space formulation not implemented yet!")
-end
-
-function _register_RNN!(model::JuMP.AbstractModel, model_type::Symbol, ::Val{:hybrid})
-    # Hybrid formulation implementation
-    # TODO: Implement hybrid formulation
-    @info "Registering RNN with hybrid formulation using $model_type model type"
-    error("Hybrid formulation not implemented yet!")
-end
-
 # ===============================================================================================================================================================================================================================================
 # TODO: implement LSTM and GRU later
 function register_LSTM!()

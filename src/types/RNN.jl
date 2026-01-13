@@ -1,7 +1,3 @@
-using JuMP
-using PythonCall
-
-include("../utils.jl")
 
 struct RNNModel <: NNModel 
     seq_length::Int64;
@@ -14,6 +10,54 @@ struct RNNModel <: NNModel
     bh::Vector{Float64};
     act_func::ActFunc;
     direction::Int64;
+end
+
+# translating the written PyTorch model to RNNModel structure
+
+# Multiple dispatch methods for different formulations
+function _register_RNN!(model::JuMP.AbstractModel, rnn_model::PyTorchModel, ::Val{:full_space})
+    # Full space formulation implementation
+    # TODO: Implement full space formulation
+    @info "Registering RNN with full_space formulation using PyTorch model type"
+
+    error("Full space formulation not implemented yet!")
+end
+
+function _register_RNN!(model::JuMP.AbstractModel, rnn_model::PyTorchModel, ::Val{:reduced_space})
+    # Reduced space formulation implementation
+    # TODO: Implement reduced space formulation
+    @info "Registering RNN with reduced_space formulation using PyTorch model type"
+    error("Reduced space formulation not implemented yet!")
+end
+
+function _register_RNN!(model::JuMP.AbstractModel, rnn_model::PyTorchModel, ::Val{:hybrid})
+    # Hybrid formulation implementation
+    # TODO: Implement hybrid formulation
+    @info "Registering RNN with hybrid formulation using PyTorch model type"
+    error("Hybrid formulation not implemented yet!")
+end
+
+# Multiple dispatch methods for different formulations for ONNXModel
+function _register_RNN!(model::JuMP.AbstractModel, rnn_model::ONNXModel, ::Val{:full_space})
+    # Full space formulation implementation
+    # TODO: Implement full space formulation
+    @info "Registering RNN with full_space formulation using PyTorch model type"
+
+    error("Full space formulation not implemented yet!")
+end
+
+function _register_RNN!(model::JuMP.AbstractModel, rnn_model::ONNXModel, ::Val{:reduced_space})
+    # Reduced space formulation implementation
+    # TODO: Implement reduced space formulation
+    @info "Registering RNN with reduced_space formulation using PyTorch model type"
+    error("Reduced space formulation not implemented yet!")
+end
+
+function _register_RNN!(model::JuMP.AbstractModel, rnn_model::ONNXModel, ::Val{:hybrid})
+    # Hybrid formulation implementation
+    # TODO: Implement hybrid formulation
+    @info "Registering RNN with hybrid formulation using PyTorch model type"
+    error("Hybrid formulation not implemented yet!")
 end
 
 function RNNModel(model_load_path::String)
@@ -35,15 +79,4 @@ end
 function RNNModel(seq_length::Int64, hidden_size::Int64, input_size::Int64, output_size::Int64, 
                   Wx::Array{Float64,2}, Wh::Array{Float64,2}, bx::Vector{Float64}, bh::Vector{Float64})
     return RNNModel(seq_length, hidden_size, input_size, output_size, Wx, Wh, bx, bh, tanh)
-end
-
-function register_RNN!(model::JuMP.Model, reg_method::String = "HB")
-
-    if reg_method == ["hybrid", "reduced"] 
-        error("$reg_method formulation not supported yet!")
-    else
-        
-        # implemening full_space formulation regiteration 
-        register_full(model, onnx_params)
-    end
 end
