@@ -16,7 +16,7 @@ torch.onnx.export(
 ```
 
 ## Example
-Here is an simple example on how OptRNN can work to register a model using its full-space registeration:
+Here is an simple example on how OptRNN can work to register a model using its full-space formulation registeration:
 
 ```julia 
 using OptRNN

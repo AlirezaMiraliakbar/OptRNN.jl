@@ -11,6 +11,10 @@ struct ONNXModel <: NNModel
     num_outputs::Int64;
 end
 
+mutable struct ONNXDAG
+    nodes::Vector{Any};
+end
+
 """
         load_onnx(path::String) -> ONNXModel
 

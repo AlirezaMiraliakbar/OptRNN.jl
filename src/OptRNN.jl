@@ -1,9 +1,14 @@
 module OptRNN
 
 using JuMP
-
+using Reexport
+using ONNXLowLevel
 # Export main types and functions
 export register_RNN!, register_LSTM!, register_GRU!, PyTorchModel, ONNXModel
+export ParsedONNXModel, RNNLayerInfo, FCLayerInfo, ActivationInfo
+export parse_onnx_graph, summarize_model
+export extract_rnn_weights, get_weights_for_jump, get_layer_connectivity
+export MATHEMATICAL_OPS, INFRASTRUCTURE_OPS, is_mathematical_op
 
 # Package version
 const VERSION = v"0.1.0"
@@ -19,8 +24,9 @@ abstract type NNModel end
 abstract type ActFunc end
 
 
-include("types/models/pytorch.jl")
-include("types/models/onnx.jl")
+include("types/parse/pytorch.jl")
+include("types/parse/onnx.jl")
+include("types/parse/onnx_parser.jl")
 include("types/RNN.jl")
 include("types/LSTM.jl")
 include("types/GRU.jl")
@@ -97,4 +103,7 @@ function register_GRU!()
     return nothing
 end
 
+# Re-export dependencies for convenient REPL usage
+@reexport using JuMP
+@reexport using ONNXLowLevel
 end # module OptRNN
